@@ -42,7 +42,7 @@ export default function Login() {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/proposals`,
+          emailRedirectTo: `${import.meta.env.VITE_SITE_URL || window.location.origin}/proposals`,
         },
       })
       if (error) setError(error.message)
@@ -51,7 +51,7 @@ export default function Login() {
     } else if (mode === MODES.magic) {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/proposals` },
+        options: { emailRedirectTo: `${import.meta.env.VITE_SITE_URL || window.location.origin}/proposals` },
       })
       if (error) setError(error.message)
       else setSuccess('Lien envoyé — vérifiez votre boîte email.')
