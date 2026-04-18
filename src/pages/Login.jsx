@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const MODES = {
@@ -8,6 +9,7 @@ const MODES = {
 }
 
 export default function Login() {
+  const navigate = useNavigate()
   const [mode, setMode] = useState(MODES.login)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,7 +34,7 @@ export default function Login() {
     if (mode === MODES.login) {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
-      // on success AuthContext picks up the session and App redirects automatically
+      else navigate('/proposals')
 
     } else if (mode === MODES.register) {
       const { error } = await supabase.auth.signUp({
