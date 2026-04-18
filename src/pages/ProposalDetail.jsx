@@ -19,7 +19,15 @@ const STATUS_COLORS = {
 }
 
 function FileAttachment({ url, name }) {
+  const [signedUrl, setSignedUrl] = useState(null)
   const isImage = /\.(png|jpe?g|gif|webp)$/i.test(name)
+
+  useEffect(() => {
+    supabase.storage
+      .from('documents')
+      .createSignedUrl(url, 3600)
+      .then(({ data }) => { if (data) setSignedUrl(data.signedUrl) })
+  }, [url])
 
   async function handleDownload() {
     const { data } = await supabase.storage.from('documents').download(url)
@@ -30,14 +38,17 @@ function FileAttachment({ url, name }) {
     a.click()
   }
 
+  if (!signedUrl) return <p className="text-xs text-gray-400 mt-2">Chargement de la pièce jointe…</p>
+
   return (
     <div className="mt-2">
       {isImage ? (
         <img
-          src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/authenticated/documents/${url}`}
+          src={signedUrl}
           alt={name}
-          className="max-w-xs rounded border border-gray-200 cursor-pointer"
+          className="max-w-xs rounded border border-gray-200 cursor-pointer hover:opacity-90"
           onClick={handleDownload}
+          title="Cliquer pour télécharger"
         />
       ) : (
         <button
