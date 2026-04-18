@@ -6,6 +6,7 @@ import Proposals from './pages/Proposals'
 import Decisions from './pages/Decisions'
 import Admin from './pages/Admin'
 import Account from './pages/Account'
+import ProposalDetail from './pages/ProposalDetail'
 
 function GuestRoute({ children }) {
   const { session } = useAuth()
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/decisions" element={<ProtectedRoute><Decisions /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="/proposals/:id" element={<ProtectedRoute><ProposalDetail /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/proposals" replace />} />
         </Routes>
       </BrowserRouter>

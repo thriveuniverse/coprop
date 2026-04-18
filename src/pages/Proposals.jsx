@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import Layout from '../components/Layout'
@@ -54,7 +55,6 @@ function NewProposalModal({ onClose, onCreated }) {
           <h2 className="font-semibold text-gray-900">Nouvelle proposition</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
-
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Titre <span className="text-red-500">*</span></label>
@@ -67,7 +67,6 @@ function NewProposalModal({ onClose, onCreated }) {
               placeholder="Ex: Installation panneaux solaires"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea
@@ -78,7 +77,6 @@ function NewProposalModal({ onClose, onCreated }) {
               placeholder="Détails de la proposition…"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Tags (optionnel)</label>
             <div className="flex flex-wrap gap-2">
@@ -98,22 +96,12 @@ function NewProposalModal({ onClose, onCreated }) {
               ))}
             </div>
           </div>
-
           {error && <p className="text-sm text-red-600">{error}</p>}
-
           <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-sm px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
+            <button type="button" onClick={onClose} className="text-sm px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
               Annuler
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="text-sm px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading} className="text-sm px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">
               {loading ? 'Enregistrement…' : 'Créer la proposition'}
             </button>
           </div>
@@ -124,6 +112,7 @@ function NewProposalModal({ onClose, onCreated }) {
 }
 
 export default function Proposals() {
+  const navigate = useNavigate()
   const [proposals, setProposals] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -131,7 +120,7 @@ export default function Proposals() {
   function loadProposals() {
     supabase
       .from('proposals')
-      .select('*')
+      .select('*, comments(count)')
       .order('created_at', { ascending: false })
       .then(({ data }) => {
         setProposals(data || [])
@@ -159,28 +148,42 @@ export default function Proposals() {
         <p className="text-gray-500 text-sm">Aucune proposition pour le moment.</p>
       ) : (
         <ul className="space-y-3">
-          {proposals.map(p => (
-            <li key={p.id} className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-medium text-gray-900">{p.title}</h2>
-                  {p.description && (
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{p.description}</p>
-                  )}
-                  {p.tags?.length > 0 && (
-                    <div className="flex gap-1 mt-2 flex-wrap">
-                      {p.tags.map(tag => (
-                        <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{tag}</span>
-                      ))}
-                    </div>
-                  )}
+          {proposals.map(p => {
+            const commentCount = p.comments?.[0]?.count ?? 0
+            return (
+              <li
+                key={p.id}
+                onClick={() => navigate(`/proposals/${p.id}`)}
+                className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <h2 className="font-medium text-gray-900">{p.title}</h2>
+                    {p.description && (
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{p.description}</p>
+                    )}
+                    {p.tags?.length > 0 && (
+                      <div className="flex gap-1 mt-2 flex-wrap">
+                        {p.tags.map(tag => (
+                          <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_COLORS[p.status]}`}>
+                      {STATUS_LABELS[p.status]}
+                    </span>
+                    {commentCount > 0 && (
+                      <span className="text-xs text-gray-500">
+                        💬 {commentCount}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${STATUS_COLORS[p.status]}`}>
-                  {STATUS_LABELS[p.status]}
-                </span>
-              </div>
-            </li>
-          ))}
+              </li>
+            )
+          })}
         </ul>
       )}
 
