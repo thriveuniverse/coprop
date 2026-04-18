@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Proposals from './pages/Proposals'
 import Decisions from './pages/Decisions'
 import Admin from './pages/Admin'
+import Account from './pages/Account'
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
           <Route path="/decisions" element={<ProtectedRoute><Decisions /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+          <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/proposals" replace />} />
         </Routes>
       </BrowserRouter>
